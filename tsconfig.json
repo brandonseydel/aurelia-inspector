@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "target": "ESNext",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "module": "ESNext"
+  },
+  "include": ["test", "src"],
+  "files": ["src/resource.d.ts"]
+}
