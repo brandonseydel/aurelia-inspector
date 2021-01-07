@@ -1,0 +1,102 @@
+<template>
+  <require from="./reset.css"></require>
+  <require from="./app.css"></require>
+
+  <div id="au-dev-root" class="${isDarkTheme ? 'dark' : ''}">
+    <h1 class="app-header">
+      <aurelia-logo></aurelia-logo>
+      <span class="logo-badge">INSPECTOR</span>
+    </h1>
+
+    <main>
+      <p class="not-found" style="margin-bottom: 10px">
+        Select a node through the inspect window to scope into that node. Click
+        on the value will allow one to edit the value and bind to the view.
+      </p>
+      <!-- <debug-group heading="Binding Context" show.bind="true">
+        <template if.bind="debugInfo.bindingContext">
+          <ul>
+            <li repeat.for="property of debugInfo.bindingContext.properties">
+              <property-view property.bind="property"></property-view>
+            </li>
+          </ul>
+        </template>
+        <template if.bind="!debugInfo.bindingContext">
+          <span class="not-found"
+            >No binding context found for the selected node.</span
+          >
+        </template>
+      </debug-group>
+
+      <debug-group heading="Override Context">
+        <template
+          if.bind="debugInfo.overrideContext && debugInfo.overrideContext.properties.length"
+        >
+          <ul>
+            <li repeat.for="property of debugInfo.overrideContext.properties">
+              <property-view property.bind="property"></property-view>
+            </li>
+          </ul>
+        </template>
+        <template
+          if.bind="!debugInfo.overrideContext || !debugInfo.overrideContext.properties.length"
+        >
+          <span class="not-found"
+            >No override context found for the selected node.</span
+          >
+        </template>
+      </debug-group> -->
+
+      <debug-group heading="Custom Element">
+        <template au-slot>
+          <span if.bind="!selectedElement" class="not-found"
+            >The selected node is not a custom element.</span
+          >
+          <controller-view
+            else
+            controller.bind="selectedElement"
+          ></controller-view>
+        </template>
+      </debug-group>
+
+      <debug-group heading="Custom Attributes">
+        <template au-slot>
+          <span if.bind="!selectedElementAttributes" class="not-found"
+            >No custom attributes found on the selected node.</span
+          >
+          <ul else>
+            <li
+              repeat.for="customAttribute of selectedElementAttributes"
+              class="custom-attribute"
+            >
+              <h3 class="attribute-name">${customAttribute.name}</h3>
+              &nbsp;<span class="block-token">{</span>
+              <controller-view
+                controller.bind="customAttribute"
+              ></controller-view>
+              <span class="block-token">}</span>
+            </li>
+          </ul>
+        </template>
+      </debug-group>
+    </main>
+
+    <!-- <main>
+      <custom-element if.bind="selectedElement">
+        ${JSON.stringify(selectedElement)}
+        <div>Name = ${selectedElement.name}</div>
+        <div>Key = ${selectedElement.key}</div>
+        <div>Aliases = ${selectedElement.aliases.join(', ')}</div>
+        <h3>Bindables</h3>
+        <div repeat.for="value of selectedElement.bindables">
+          ${value.name} =
+          <input
+            value.bind="value.value"
+            keyup.delegate="valueChanged(selectedElement)"
+          />
+        </div>
+        <hr />
+      </custom-element>
+    </main> -->
+  </div>
+</template>

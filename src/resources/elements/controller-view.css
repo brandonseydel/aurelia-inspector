@@ -1,0 +1,13 @@
+controller-view .category-name {
+  font-size: 10px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  color: black;
+}
+
+.dark controller-view .category-name {
+  font-size: 10px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  color: white;
+}
