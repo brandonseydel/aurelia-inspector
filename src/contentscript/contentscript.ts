@@ -58,8 +58,6 @@ export function install(win) {
       try {
         while (!customElement && element !== document.body) {
           customElement = (Reflect as any).getOwnMetadata('au:resource:custom-element', element) as IComponentController;
-
-
           const customAttributeKeys = ((Reflect as any).getOwnMetadataKeys(element) as string[]).filter(y => y.includes('custom-attribute'));
           customAttributes = customAttributeKeys.map(x => (Reflect as any).getOwnMetadata(x, element) as IComponentController);
           element = element.parentElement;
@@ -82,8 +80,8 @@ export function install(win) {
     }
   }
 
-  window.addEventListener('au-started', (test) => {
-    hooks.Aurelia = (test.target as any).$aurelia as Aurelia;
+  window.addEventListener('au-started', (customEvent: CustomEvent<Aurelia>) => {
+    hooks.Aurelia = customEvent.detail;
   }, { once: true });
 
   Object.defineProperty(win, '__AURELIA_DEVTOOLS_GLOBAL_HOOK__', {
@@ -136,7 +134,6 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
   get() {
     return {
       getCustomElementInfo: (element: Element) => {
-
       }
     };
   }

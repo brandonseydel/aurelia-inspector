@@ -6,6 +6,6 @@ window.addEventListener('au-composed', () => {
 
 
 // detects V2
-window.addEventListener('au-started', (test) => {
+window.addEventListener('au-started', () => {
   chrome.runtime.sendMessage({ aureliaDetected: true, version: 2 });
 }, { once: true });
