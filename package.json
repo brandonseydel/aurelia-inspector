@@ -8,7 +8,8 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "aurelia": "dev"
+    "aurelia": "dev",
+    "aurelia-bootstrapper": "^2.3.3"
   },
   "devDependencies": {
     "@aurelia/testing": "dev",
@@ -19,6 +20,11 @@
     "@types/node": "^14.14.16",
     "@typescript-eslint/eslint-plugin": "^4.11.0",
     "@typescript-eslint/parser": "^4.11.0",
+    "aurelia-loader-nodejs": "^1.1.0",
+    "aurelia-loader-webpack": "^2.2.2",
+    "aurelia-pal-nodejs": "^2.0.0",
+    "aurelia-testing": "^1.0.0",
+    "aurelia-webpack-plugin": "^4.0.0",
     "autoprefixer": "^10.1.0",
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^5.0.1",

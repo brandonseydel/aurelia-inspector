@@ -146,7 +146,3 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
 if (document instanceof HTMLDocument) {
   installScript(install)
 }
-
-window.addEventListener('au-started', (test) => {
-  chrome.runtime.sendMessage({ aureliaDetected: true });
-}, { once: true });

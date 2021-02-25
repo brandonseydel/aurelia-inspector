@@ -1,7 +1,6 @@
 import { DebugHost, SelectionChanged } from "./backend/debug-host";
 import { inject, ValueConverterInstance, INode, ICustomElementViewModel, IPlatform, bindable } from "aurelia";
 import { IControllerInfo } from "./shared/controller-info";
-import { debug } from "webpack";
 import { AureliaInfo } from "./shared/aurelia-hooks";
 
 @inject()

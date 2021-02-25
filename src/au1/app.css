@@ -1,0 +1,53 @@
+.app-header {
+  background: #f4f4f4;
+  padding: 0;
+  padding: 5px 0 0 0;
+  text-align: center;
+}
+
+.dark .app-header {
+  background: #2a2a2a;
+}
+
+.logo-badge {
+  position: relative;
+  top: -7px;
+  font-weight: 100;
+  font-size: 16px;
+  color: #BB79A8;
+}
+
+.not-found {
+  font-style: italic;
+  font-size: 10px;
+}
+
+.dark .not-found {
+  color: #989898;
+}
+
+.custom-attribute {
+  margin-bottom: 4px;
+}
+
+.custom-attribute .attribute-name {
+  color: saddlebrown;
+}
+.dark .custom-attribute .attribute-name {
+  color: #ef9565;
+}
+
+.custom-attribute .block-token {
+  color: gray;
+}
+
+.custom-attribute .attribute-name, .custom-attribute .block-token {
+  font-size: 12px;
+  display: inline;
+  font-family: monospace;
+}
+
+.custom-attribute controller-view {
+  margin-left: 8px;
+  display: block;
+}

@@ -16,7 +16,14 @@
       "matches": ["<all_urls>"],
       "js": ["build/contentscript.js"],
       "run_at": "document_start"
+    }   ,
+    {
+      "all_frames": true,
+      "matches": ["<all_urls>"],
+      "js": ["build/detector.js"],
+      "run_at": "document_start"
     }   
+
   ],
   "browser_action": {
     "default_icon": {

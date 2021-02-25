@@ -8,9 +8,15 @@ chrome.runtime.onMessage.addListener((req, sender) => {
         128: `images/128.png`
       }
     });
+
+    chrome.browserAction.setTitle({
+      title: `Aurelia ${req.version} Devtools`,
+      tabId: sender.tab.id
+    });
+
     chrome.browserAction.setPopup({
       tabId: sender.tab.id,
-      popup: `popups/enabled.html`
+      popup: `popups/enabled${req.version === 1 && '-v1'}.html`
     });
   }
 });

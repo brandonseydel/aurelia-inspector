@@ -1,8 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const NodeTargetPlugin = require('webpack/lib/node/NodeTargetPlugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { default: Aurelia } = require('aurelia');
+const { AureliaPlugin, ModuleDependenciesPlugin } = require('aurelia-webpack-plugin');
 
 const cssLoader = 'css-loader';
 
@@ -13,6 +15,7 @@ module.exports = function (env, { analyze }) {
     devtool: !production ? 'inline-source-map' : false,
     entry: {
       entry: './src/main.ts',
+      ['au1']: ['./src/au1/main.ts'],
       detector: './src/detector/detector.ts',
       background: './src/background/background.ts',
       ['contentscript']: './src/contentscript/contentscript.ts',
@@ -48,7 +51,9 @@ module.exports = function (env, { analyze }) {
       minimize: false
     },
     plugins: [
-      new HtmlWebpackPlugin({ cache: false, template: 'index.ejs', chunks: ['entry'] }),
+      new NodeTargetPlugin(),
+      new HtmlWebpackPlugin({ cache: false, template: 'index.ejs', chunks: ['entry'], filename: 'index.html' }),
+      new HtmlWebpackPlugin({ cache: false, template: 'index-v1.ejs', chunks: ['au1'], filename: 'index-v1.html' }),
       analyze && new BundleAnalyzerPlugin(),
       new CopyPlugin({
         patterns: [

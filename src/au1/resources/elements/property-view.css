@@ -1,0 +1,105 @@
+property-view {
+  margin-top: 2px;
+  display: block;
+}
+
+property-view .arrow {
+  font-size: 10px;
+  color: dimgray;
+  cursor: default;
+}
+
+property-view .arrow .right {
+  margin-right: 1px;
+}
+
+property-view .property-line {
+  white-space: nowrap;
+}
+
+property-view .property-name {
+  font-size: 12px;
+  color: purple;
+  font-family: monospace;
+  margin-left: 1px;
+}
+
+.dark property-view .property-name {
+  color: #34c7bb;
+}
+property-view .value-container {
+  position: relative;
+}
+
+property-view .property-editor {
+  font-family: monospace;
+  font-size: 12px;
+  margin: 0;
+  height: 12px;
+  outline: none;
+  border: 1px solid darkgray;
+  box-shadow: 0 0 5px rgba(0,0,0,.5);
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  padding: 0 0 0 2px;
+}
+
+property-view .property-value, property-view .token-colon {
+  font-size: 12px;
+  color: dimgray;
+  font-family: monospace;
+}
+
+property-view .property-value.null, property-view .property-value.undefined {
+  color: dimgray;
+}
+
+property-view .property-value.boolean {
+  color: deeppink;
+}
+
+property-view .property-value.string {
+  color: red;
+  white-space: nowrap;
+}
+.dark property-view .property-value.string {
+  color:#cbcbcb;
+}
+
+property-view .property-value.number {
+  color: blue;
+}
+
+.dark property-view .property-value.number {
+  color: #59a6ca;
+}
+
+property-view .property-value.array {
+  color: black;
+}
+
+.dark property-view .property-value.array {
+  color: #cbcbcb;
+}
+
+property-view .property-value.object, property-view .property-value.node {
+  color: black;
+}
+
+.dark property-view .property-value.object, property-view .property-value.node {
+  color: #cbcbcb;
+}
+
+property-view ul.properties {
+  margin-left: 16px;
+}
+
+property-view .no-properties {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.dark property-view .no-properties {
+  color: #989898;
+}
