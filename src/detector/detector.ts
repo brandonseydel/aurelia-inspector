@@ -1,6 +1,6 @@
 
 // detects V1
-window.addEventListener('au-composed', () => {
+window.addEventListener('aurelia-composed', () => {
   chrome.runtime.sendMessage({ aureliaDetected: true, version: 1 });
 }, { once: true });
 
