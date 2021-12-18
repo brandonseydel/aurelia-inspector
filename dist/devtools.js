@@ -3,7 +3,7 @@ chrome.runtime.onMessage.addListener((req, sender) => {
     chrome.devtools.panels.elements.createSidebarPane(
       "Aurelia",
       function (sidebar) {
-        sidebar.setPage(`index${req.version === 1 && '-v1'}.html`);
+        sidebar.setPage(`index-v${req.version}.html`);
       }
     );
   }
