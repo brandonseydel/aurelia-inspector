@@ -57,9 +57,12 @@ export function install(win) {
 
       try {
         while (!customElement && element !== document.body) {
-          customElement = (Reflect as any).getOwnMetadata('au:resource:custom-element', element) as IComponentController;
-          const customAttributeKeys = ((Reflect as any).getOwnMetadataKeys(element) as string[]).filter(y => y.includes('custom-attribute'));
-          customAttributes = customAttributeKeys.map(x => (Reflect as any).getOwnMetadata(x, element) as IComponentController);
+          const au = element['$au'];
+          if (au) {
+            customElement = element['$au']['au:resource:custom-element'];
+            const customAttributeKeys = Object.getOwnPropertyNames(au).filter(y => y.includes('custom-attribute'));
+            customAttributes = customAttributeKeys.map(x => au[x] as IComponentController);
+          }
           element = element.parentElement;
           if (!traverse) break;
         }
