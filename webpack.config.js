@@ -48,7 +48,7 @@ module.exports = function (env, { analyze }) {
       minimize: false
     },
     plugins: [
-      new HtmlWebpackPlugin({ cache: false, template: 'index.html', chunks: ['entry'] }),
+      new HtmlWebpackPlugin({ cache: false, template: 'index-v2.html', filename: 'index-v2.html', chunks: ['entry'], inject: true }),
       analyze && new BundleAnalyzerPlugin(),
       new CopyPlugin({
         patterns: [
