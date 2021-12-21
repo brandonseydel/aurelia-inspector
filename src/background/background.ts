@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener((req, sender) => {
 
     chrome.browserAction.setPopup({
       tabId: sender.tab.id,
-      popup: `popups/enabled${req.version === 1 && '-v1'}.html`
+      popup: `popups/enabled-v${req.version}.html`
     });
   }
 });
