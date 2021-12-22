@@ -78,6 +78,7 @@ export function install(win) {
       hooks.currentAttributes = customAttributes;
 
       const customElementInfo: IControllerInfo = extractControllerInfo(customElement);
+      /* prettier-ignore */ console.log('TCL: install -> customElementInfo', customElementInfo)
       const customAttributesInfo: IControllerInfo[] = customAttributes && customAttributes.map(extractControllerInfo).filter(x => x);
       return {
         customElementInfo,
@@ -86,7 +87,9 @@ export function install(win) {
     },
 
     getExpandedDebugValueForId(id) {
+      /* prettier-ignore */ console.log('TCL: getExpandedDebugValueForId -> id', id)
       let value = debugValueLookup[id].expandableValue;
+      /* prettier-ignore */ console.log('TCL: getExpandedDebugValueForId -> value', value)
 
       if (Array.isArray(value)) {
         let newValue = {};
@@ -111,6 +114,7 @@ export function install(win) {
   });
 
   function extractControllerInfo(customElement) {
+    /* prettier-ignore */ console.log('TCL: extractControllerInfo -> customElement', customElement)
     if (!customElement) return;
     const bindableKeys = Object.keys(customElement.definition.bindables);
     const returnVal: IControllerInfo = {
@@ -443,8 +447,9 @@ export function install(win) {
     let props = [];
 
     const keys = [...Object.keys(obj), ...Object.getOwnPropertyNames(obj)];
+    const uniqueKeys = keys.filter((value, i, arr) => arr.indexOf(value) === i);
 
-    for (const key of keys) {
+    for (const key of uniqueKeys) {
       if (key && !key.startsWith('_') && typeof obj[key] !== 'function') {
         props.push(key);
       }
