@@ -65,7 +65,7 @@ export class DebugHost implements ICustomElementViewModel {
       debugInfo.isExpanded = !debugInfo.isExpanded;
 
       if (debugInfo.isExpanded && !debugInfo.expandedValue) {
-        let code = `aureliaDebugger.getExpandedDebugValueForId(${debugInfo.debugId});`;
+        let code = `window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getExpandedDebugValueForId(${debugInfo.debugId});`;
 
         chrome.devtools.inspectedWindow.eval(code, (expandedValue) => {
           debugInfo.expandedValue = expandedValue;

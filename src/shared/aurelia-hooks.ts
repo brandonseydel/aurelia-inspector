@@ -14,4 +14,5 @@ export interface AureliaHooks {
   getCustomElementInfo?: (e: Element, traverse: boolean) => AureliaInfo;
   getAllInfo: (e: Element) => AureliaInfo[];
   updateValues: (obj: IControllerInfo) => IControllerInfo;
+  getExpandedDebugValueForId?: (id: string) => Pick<IControllerInfo, 'properties'>
 }

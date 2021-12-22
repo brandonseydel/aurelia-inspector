@@ -83,6 +83,20 @@ export function install(win) {
         customElementInfo,
         customAttributesInfo
       };
+    },
+
+    getExpandedDebugValueForId(id) {
+      let value = debugValueLookup[id].expandableValue;
+
+      if (Array.isArray(value)) {
+        let newValue = {};
+        value.forEach((value, index) => {
+          newValue[index] = value
+        });
+        value = newValue;
+      }
+
+      return convertObjectToDebugInfo(value);
     }
   }
 
@@ -228,7 +242,7 @@ export function install(win) {
     }
   }
 
-  function convertObjectToDebugInfo(obj, blackList?) {
+  function convertObjectToDebugInfo(obj, blackList?): Pick<IControllerInfo, 'properties'> {
     blackList = blackList || {};
     return {
       properties: getDebugPropertyKeys(obj)
@@ -286,19 +300,6 @@ export function install(win) {
     }
   }
 
-  function getExpandedDebugValueForId(id) {
-    let value = debugValueLookup[id].expandableValue;
-
-    if (Array.isArray(value)) {
-      let newValue = {};
-      value.forEach((value, index) => {
-        newValue[index] = value
-      });
-      value = newValue;
-    }
-
-    return convertObjectToDebugInfo(value);
-  }
 
   function findOwningViewOfNode(node) {
     function moveUp(n) {
@@ -325,19 +326,19 @@ export function install(win) {
     return ++nextDebugId;
   }
 
-  function createErrorObject(e) {
-    return {
-      bindingContext: {
-        properties: [
-          {
+  function createErrorObject(e): IControllerInfo['properties'] {
+    return [{
+      // bindingContext: {
+        // properties: [
+          // {
             name: 'Debugger Error',
             value: e.message,
             type: 'string',
             canEdit: false
-          }
-        ]
-      }
-    }
+          // }
+        // ]
+      // }
+    }]
   }
 
   function attachedOwner(node) {
