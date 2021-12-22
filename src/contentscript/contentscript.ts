@@ -107,9 +107,35 @@ export function install(win) {
           newValue[index] = value
         });
         value = newValue;
+      } else if (isMap(value)) {
+        let mapToArr = []
+        value = value.forEach((value, key)  =>{
+          mapToArr.push([value, key])
+        })
+        value = mapToArr
+      } else if (isSet(value)) {
+        value = Array.from(value)
       }
 
       return convertObjectToDebugInfo(value);
+
+      // https://stackoverflow.com/questions/29924932/how-to-reliably-check-an-object-is-an-ecmascript-6-map-set
+      function isMap(o): o is Map<any,any> {
+        try {
+            Map.prototype.has.call(o); // throws if o is not an object or has no [[MapData]]
+            return true;
+        } catch(e) {
+            return false;
+        }
+      }
+      function isSet(o): o is Set<any> {
+          try {
+              Set.prototype.has.call(o); // throws if o is not an object or has no [[SetData]]
+              return true;
+          } catch(e) {
+              return false;
+          }
+      }
     }
   }
 
