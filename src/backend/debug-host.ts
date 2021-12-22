@@ -30,7 +30,7 @@ export class DebugHost implements ICustomElementViewModel {
       });
 
       chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getCustomElementInfo($0, false)`, (debugObject: AureliaInfo) => {
+        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getCustomElementInfo($0)`, (debugObject: AureliaInfo) => {
           this.consumer.selectedElement = debugObject?.customElementInfo;
           this.consumer.selectedElementAttributes = debugObject?.customAttributesInfo;
         });

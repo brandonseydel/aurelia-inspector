@@ -83,6 +83,7 @@ export function install(win) {
           if (!traverse) break;
         }
       } catch (e) {
+        console.log(e)
       }
 
       if (!customElement && !customAttributes) return;
