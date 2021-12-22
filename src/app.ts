@@ -20,6 +20,10 @@ export class App implements ICustomElementViewModel {
     this.debugHost.attach(this);
     this.isDarkTheme = (chrome?.devtools?.panels as any)?.themeName === "dark";
     [].join()
+
+    if (this.isDarkTheme) {
+      document.querySelector('html').style.background = '#202124'
+    }
   }
 
   get currentController() {
