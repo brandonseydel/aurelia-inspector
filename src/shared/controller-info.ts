@@ -11,7 +11,9 @@ export interface IControllerInfo {
   }[];
   properties: {
     type: string,
+    canExpand?: boolean,
     isEditing?: boolean,
+    isExpanding?: boolean,
     name: string,
     value: unknown
   }[];

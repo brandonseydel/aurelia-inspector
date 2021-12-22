@@ -34,6 +34,9 @@ export function getCustomElementInfo(element: Element) {
 }
 
 export function install(win) {
+  let nextDebugId = 0;
+  let debugValueLookup = {}
+
   const hooks: AureliaHooks = {
     Aurelia: undefined,
     currentElement: undefined,
@@ -128,6 +131,314 @@ export function install(win) {
     } else {
       return value;
     }
+  }
+
+  function setValueOnDebugInfo(debugInfo, value, instance) {
+    try {
+      let expandableValue:any;
+
+      if (value instanceof Node) {
+        debugInfo.canExpand = true;
+        debugInfo.type = 'node';
+        debugInfo.value = value.constructor.name;
+        expandableValue = value;
+      } else if (Array.isArray(value)) {
+        debugInfo.canExpand = true;
+        debugInfo.type = 'array';
+        debugInfo.value = `Array[${value.length}]`;
+        expandableValue = value;
+      } else {
+        debugInfo.type = typeof value;
+        debugInfo.value = value;
+      }
+
+      if (value === null) {
+        debugInfo.type = 'null';
+        debugInfo.value = 'null';
+      } else if (value === undefined) {
+        debugInfo.type = 'undefined';
+        debugInfo.value = 'undefined';
+      } else if (debugInfo.type === 'object') {
+        debugInfo.canExpand = true;
+        expandableValue = value;
+
+        if (value.constructor) {
+          debugInfo.value = value.constructor.name;
+        } else {
+          debugInfo.value = 'Object';
+        }
+      }
+
+      if (debugInfo.type === 'string' || debugInfo.type === 'number' || debugInfo.type === 'boolean') {
+        debugInfo.canEdit = true;
+      }
+
+      debugInfo.debugId = debugInfo.debugId || getNextDebugId();
+
+      debugValueLookup[debugInfo.debugId] = Object.assign({
+        instance: instance,
+        expandableValue: expandableValue
+      }, debugInfo);
+
+      return debugInfo;
+    } catch(e) {
+      return createErrorObject(e);
+    }
+  }
+
+  function createControllerDebugInfo(controller) {
+    try {
+      let controllerDebugInfo: any = {
+        name: controller.behavior.elementName || controller.behavior.attributeName
+      };
+
+      let viewModel = controller.viewModel;
+      let bindableKeys = {};
+
+      controllerDebugInfo.bindables = controller.behavior.properties.map(x => {
+        bindableKeys[x.name] = true;
+        return setValueOnDebugInfo({
+          name: x.name,
+          attribute: x.attribute,
+        }, viewModel[x.name], viewModel);
+      });
+
+      controllerDebugInfo.properties = getDebugPropertyKeys(viewModel)
+        .filter(x => !(x in bindableKeys))
+        .map(x => {
+          return setValueOnDebugInfo({
+            name: x
+          }, viewModel[x], viewModel);
+        });
+
+      return controllerDebugInfo;
+    } catch (e) {
+      return createErrorObject(e);
+    }
+  }
+
+  function convertObjectToDebugInfo(obj, blackList?) {
+    blackList = blackList || {};
+    return {
+      properties: getDebugPropertyKeys(obj)
+        .filter(x => !(x in blackList))
+        .map(x => {
+          return setValueOnDebugInfo({
+            name: x
+          }, obj[x], obj);
+        })
+    };
+  }
+
+  function getDebugInfoForNode(selectedNode) {
+    try {
+      var debugInfo: any = {};
+
+      nextDebugId = 0;
+
+      if (selectedNode.au) {
+        var au = selectedNode.au;
+
+        if (au.controller) {
+          debugInfo.customElement = createControllerDebugInfo(au.controller);
+        }
+
+        var tagName = selectedNode.tagName ? selectedNode.tagName.toLowerCase() : null;
+        var customAttributeNames = getDebugPropertyKeys(au)
+          .filter(function (key) {
+            return key !== 'controller' && key !== tagName;
+          });
+
+        if (customAttributeNames.length) {
+          debugInfo.customAttributes = customAttributeNames.map(x => createControllerDebugInfo(au[x]));
+        }
+      }
+
+      let owningView = findOwningViewOfNode(selectedNode);
+
+      if (owningView) {
+        if (owningView.bindingContext) {
+          debugInfo.bindingContext = convertObjectToDebugInfo(owningView.bindingContext);
+        }
+
+        if (owningView.overrideContext) {
+          debugInfo.overrideContext = convertObjectToDebugInfo(
+            owningView.overrideContext,
+            { bindingContext: true, parentOverrideContext: true }
+          );
+        }
+      }
+
+      return debugInfo;
+    } catch (e) {
+      return createErrorObject(e);
+    }
+  }
+
+  function getExpandedDebugValueForId(id) {
+    let value = debugValueLookup[id].expandableValue;
+
+    if (Array.isArray(value)) {
+      let newValue = {};
+      value.forEach((value, index) => {
+        newValue[index] = value
+      });
+      value = newValue;
+    }
+
+    return convertObjectToDebugInfo(value);
+  }
+
+  function findOwningViewOfNode(node) {
+    function moveUp(n) {
+      let current = n.parentNode;
+
+      if (current) {
+        return findComposingView(current) || findSiblingRepeaterView(current) || findImmediateControllerOwningView(current) || moveUp(current);
+      }
+
+      return null;
+    }
+
+    return attachedOwner(node) || findSiblingRepeaterView(node) || findImmediateControllerOwningView(node) || moveUp(node);
+  }
+
+  function updateValueForId(id, value) {
+    let debugInfo = debugValueLookup[id];
+    debugInfo.instance[debugInfo.name] = value;
+    setValueOnDebugInfo(debugInfo, value, debugInfo.instance);
+  }
+
+
+  function getNextDebugId() {
+    return ++nextDebugId;
+  }
+
+  function createErrorObject(e) {
+    return {
+      bindingContext: {
+        properties: [
+          {
+            name: 'Debugger Error',
+            value: e.message,
+            type: 'string',
+            canEdit: false
+          }
+        ]
+      }
+    }
+  }
+
+  function attachedOwner(node) {
+    let ownerView = node.auOwnerView;
+
+    if (ownerView && ownerView.viewFactory) {
+      return ownerView;
+    }
+
+    return null;
+  }
+
+  function nodeIsImmediateChildOfView(view, node) {
+    let currentChild = view.firstChild
+    let lastChild = view.lastChild;
+    let nextChild;
+
+    while (currentChild) {
+      nextChild = currentChild.nextSibling;
+
+      if (currentChild === node) {
+        return true;
+      }
+
+      if (currentChild === lastChild) {
+        break;
+      }
+
+      currentChild = nextChild;
+    }
+
+    return false;
+  }
+
+  function findSiblingRepeaterView(node) {
+    if (!node) {
+      return null;
+    }
+
+    let current = node.nextSibling;
+
+    while (current) {
+      if (current.nodeType === 8 && current.viewSlot && current.data === 'anchor') {
+        let children = current.viewSlot.children;
+
+        for (let i = 0, ii = children.length; i < ii; ++i) {
+          let view = children[i];
+
+          if (nodeIsImmediateChildOfView(view, node)) {
+            return view;
+          }
+        }
+      }
+
+      current = current.nextSibling;
+    }
+
+    return null;
+  }
+
+  function findImmediateControllerOwningView(node) {
+    let parent = node.parentNode;
+
+    if (parent && parent.au && parent.au.controller
+      && parent.au.controller.view && nodeIsImmediateChildOfView(parent.au.controller.view, node)) {
+      return parent.au.controller.view;
+    }
+
+    return null;
+  }
+
+  function findComposingView(node) {
+    if (!node) {
+      return null;
+    }
+
+    if (node.aurelia) {
+      return node.aurelia.root.view;
+    } else if (attachedOwner(node)) {
+      return attachedOwner(node);
+    } else if (node.au) {
+      var au = node.au;
+
+      if (au.controller) { //custom element
+        var controller = au.controller;
+        var tagName = node.tagName ? node.tagName.toLowerCase() : null;
+
+        if (tagName === 'router-view') {
+          return controller.viewModel.view;
+        } else if (tagName === 'compose') {
+          return controller.viewModel.currentController.view;
+        } else if (controller['with']) {
+          return controller['with'].viewModel.view;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function getDebugPropertyKeys(obj) {
+    let props = [];
+
+    const keys = [...Object.keys(obj), ...Object.getOwnPropertyNames(obj)];
+
+    for (const key of keys) {
+      if (key && !key.startsWith('_') && typeof obj[key] !== 'function') {
+        props.push(key);
+      }
+    }
+
+    return props;
   }
 }
 
