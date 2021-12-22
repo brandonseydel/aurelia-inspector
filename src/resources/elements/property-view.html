@@ -57,6 +57,9 @@
     Object has no properties.
   </div>
   <li repeat.for="p of property.expandedValue.properties">
-    <property-view property.bind="p"></property-view>
+    <property-view
+      controller.bind="controller"
+      property.bind="p"
+    ></property-view>
   </li>
 </ul>

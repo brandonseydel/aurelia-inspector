@@ -43,8 +43,8 @@ export class DebugHost implements ICustomElementViewModel {
     }
   }
 
-  updateValues(value: IControllerInfo) {
-    chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.updateValues(${JSON.stringify(value)})`, (debugObject: AureliaInfo) => {
+  updateValues(value: IControllerInfo, property?: IControllerInfo['bindables'][0]) {
+    chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.updateValues(${JSON.stringify(value)}, ${JSON.stringify(property)})`, (debugObject: AureliaInfo) => {
       // this.consumer.selectedElement = debugObject;
     });
   }

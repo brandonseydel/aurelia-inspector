@@ -45,13 +45,26 @@ export function install(win) {
       root = root ?? document.body;
       return [hooks.getCustomElementInfo(root, false), ...Array.from(root.children).flatMap(y => hooks.getAllInfo(y))].filter(x => x);
     },
-    updateValues: (info: IControllerInfo) => {
+    updateValues: (info: IControllerInfo, property: IControllerInfo['bindables'][0]) => {
       if (!hooks.currentElement && !hooks.currentAttributes.length) return;
 
       const currentInfo = hooks.currentElement?.definition.key === info.key ? hooks.currentElement : hooks.currentAttributes.find(y => y.definition.key === info.key);
 
       info.bindables.forEach(x => currentInfo.viewModel[x.name] = x.value);
-      info.properties.forEach(x => currentInfo.viewModel[x.name] = x.value);
+      info.properties.forEach(x => {
+        // HMM: Not sure if we need the .value check
+        const isObject = x.value === 'Object' && x.type === 'object';
+        if (isObject) {
+          let targetProp = currentInfo.viewModel[x.name][property.name]
+          if (!targetProp) return
+
+          currentInfo.viewModel[x.name][property.name] = property.value
+
+          return
+        };
+
+        currentInfo.viewModel[x.name] = x.value
+      });
       return undefined;
     },
     getCustomElementInfo: (element: Element, traverse: boolean = true) => {
@@ -78,7 +91,6 @@ export function install(win) {
       hooks.currentAttributes = customAttributes;
 
       const customElementInfo: IControllerInfo = extractControllerInfo(customElement);
-      /* prettier-ignore */ console.log('TCL: install -> customElementInfo', customElementInfo)
       const customAttributesInfo: IControllerInfo[] = customAttributes && customAttributes.map(extractControllerInfo).filter(x => x);
       return {
         customElementInfo,
@@ -87,9 +99,7 @@ export function install(win) {
     },
 
     getExpandedDebugValueForId(id) {
-      /* prettier-ignore */ console.log('TCL: getExpandedDebugValueForId -> id', id)
       let value = debugValueLookup[id].expandableValue;
-      /* prettier-ignore */ console.log('TCL: getExpandedDebugValueForId -> value', value)
 
       if (Array.isArray(value)) {
         let newValue = {};
@@ -114,7 +124,6 @@ export function install(win) {
   });
 
   function extractControllerInfo(customElement) {
-    /* prettier-ignore */ console.log('TCL: extractControllerInfo -> customElement', customElement)
     if (!customElement) return;
     const bindableKeys = Object.keys(customElement.definition.bindables);
     const returnVal: IControllerInfo = {
