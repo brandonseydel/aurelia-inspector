@@ -100,17 +100,28 @@ export function install(win) {
     if (!customElement) return;
     const bindableKeys = Object.keys(customElement.definition.bindables);
     const returnVal: IControllerInfo = {
-      bindables: bindableKeys.map(y => ({
-        bindable: customElement.definition.bindables[y],
-        type: typeof (customElement.viewModel[y]),
-        name: y, value: customElement.viewModel[y]
-      })),
+      bindables: bindableKeys.map(y => {
+        return setValueOnDebugInfo({
+          name: y
+        }, customElement.viewModel[y], customElement.viewModel);
+        // return {
+        //   bindable: customElement.definition.bindables[y],
+        //   type: typeof (customElement.viewModel[y]),
+        //   name: y, value: customElement.viewModel[y]
+        // }
+      }),
       properties: Object.keys(customElement.viewModel).filter(x => !bindableKeys.some(y => y === x)).
-        filter(x => !x.startsWith('$') && typeof (customElement.viewModel[x]) !== 'object').map(y => ({
-          type: typeof (customElement.viewModel[y]),
-          name: y,
-          value: getValueFor(customElement.viewModel[y])
-        })),
+        filter(x => !x.startsWith('$')).map(y => {
+          return setValueOnDebugInfo({
+            name: y
+          }, customElement.viewModel[y], customElement.viewModel);
+
+          // return {
+          //   type: typeof (customElement.viewModel[y]),
+          //   name: y,
+          //   value: getValueFor(customElement.viewModel[y])
+          // }
+        }),
       name: customElement.definition.name,
       aliases: customElement.definition.aliases,
       key: customElement.definition.key
