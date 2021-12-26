@@ -33,7 +33,7 @@ export class PropertyView implements ICustomElementViewModel {
     if (this.property.type === 'undefined') {
       this.property.type = 'string';
     }
-    this.platform.queueMicrotask(() => this.debugHost.updateValues(this.controller));
+    this.platform.queueMicrotask(() => this.debugHost.updateValues(this.controller, this.property));
 
     return true;
   }
