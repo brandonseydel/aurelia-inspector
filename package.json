@@ -8,12 +8,12 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "aurelia": "dev"
+    "aurelia": "2.0.0-alpha.23"
   },
   "devDependencies": {
-    "@aurelia/testing": "dev",
-    "@aurelia/ts-jest": "dev",
-    "@aurelia/webpack-loader": "dev",
+    "@aurelia/testing": "2.0.0-alpha.23",
+    "@aurelia/ts-jest": "2.0.0-alpha.23",
+    "@aurelia/webpack-loader": "2.0.0-alpha.23",
     "@types/chrome": "0.0.127",
     "@types/jest": "^26.0.19",
     "@types/node": "^14.14.16",

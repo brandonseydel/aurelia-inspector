@@ -18,3 +18,7 @@ debug-group .header {
 debug-group .content {
   margin: 4px;
 }
+
+.dark debug-group .content {
+  background: #202124;
+}

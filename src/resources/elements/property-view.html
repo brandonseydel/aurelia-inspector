@@ -43,7 +43,7 @@
       ref="editor"
       type="text"
       value.bind="property.value"
-      keyup.trigger="onKeyDown($event)"
+      keyup.trigger="keyup($event)"
       blur.trigger="endEditing()"
     />
   </span>
@@ -57,6 +57,9 @@
     Object has no properties.
   </div>
   <li repeat.for="p of property.expandedValue.properties">
-    <property-view property.bind="p"></property-view>
+    <property-view
+      controller.bind="controller"
+      property.bind="p"
+    ></property-view>
   </li>
 </ul>

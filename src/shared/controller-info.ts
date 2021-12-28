@@ -1,4 +1,15 @@
 import { CustomElementDefinition, CustomAttributeDefinition } from '@aurelia/runtime-html';
+
+export interface Property {
+  type: string,
+  canExpand?: boolean,
+  canEdit?: boolean,
+  isEditing?: boolean,
+  isExpanding?: boolean,
+  name: string,
+  value: unknown
+}
+
 export interface IControllerInfo {
   name: CustomElementDefinition['name'] | CustomAttributeDefinition['name'];
   aliases: CustomElementDefinition['aliases'] | CustomAttributeDefinition['aliases'];
@@ -9,10 +20,5 @@ export interface IControllerInfo {
     isEditing?: boolean,
     name: string, value: unknown
   }[];
-  properties: {
-    type: string,
-    isEditing?: boolean,
-    name: string,
-    value: unknown
-  }[];
+  properties: Property[];
 }

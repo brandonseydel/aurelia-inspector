@@ -30,7 +30,7 @@ export class DebugHost implements ICustomElementViewModel {
       });
 
       chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getCustomElementInfo($0, false)`, (debugObject: AureliaInfo) => {
+        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getCustomElementInfo($0)`, (debugObject: AureliaInfo) => {
           this.consumer.selectedElement = debugObject?.customElementInfo;
           this.consumer.selectedElementAttributes = debugObject?.customAttributesInfo;
         });
@@ -43,8 +43,8 @@ export class DebugHost implements ICustomElementViewModel {
     }
   }
 
-  updateValues(value: IControllerInfo) {
-    chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.updateValues(${JSON.stringify(value)})`, (debugObject: AureliaInfo) => {
+  updateValues(value: IControllerInfo, property?: IControllerInfo['bindables'][0]) {
+    chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.updateValues(${JSON.stringify(value)}, ${JSON.stringify(property)})`, (debugObject: AureliaInfo) => {
       // this.consumer.selectedElement = debugObject;
     });
   }
@@ -65,7 +65,7 @@ export class DebugHost implements ICustomElementViewModel {
       debugInfo.isExpanded = !debugInfo.isExpanded;
 
       if (debugInfo.isExpanded && !debugInfo.expandedValue) {
-        let code = `aureliaDebugger.getExpandedDebugValueForId(${debugInfo.debugId});`;
+        let code = `window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getExpandedDebugValueForId(${debugInfo.debugId});`;
 
         chrome.devtools.inspectedWindow.eval(code, (expandedValue) => {
           debugInfo.expandedValue = expandedValue;

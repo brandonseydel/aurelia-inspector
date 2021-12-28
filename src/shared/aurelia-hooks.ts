@@ -13,5 +13,6 @@ export interface AureliaHooks {
   Aurelia?: Aurelia;
   getCustomElementInfo?: (e: Element, traverse: boolean) => AureliaInfo;
   getAllInfo: (e: Element) => AureliaInfo[];
-  updateValues: (obj: IControllerInfo) => IControllerInfo;
+  updateValues: (obj: IControllerInfo, property: IControllerInfo['bindables'][0]) => IControllerInfo;
+  getExpandedDebugValueForId?: (id: string) => Pick<IControllerInfo, 'properties'>
 }
