@@ -14,11 +14,8 @@ export class SelectionChanged {
 }
 
 
-@inject()
 export class DebugHost implements ICustomElementViewModel {
   consumer: App;
-
-
 
   attach(consumer: App) {
     this.consumer = consumer;

@@ -1,4 +1,4 @@
-import { CustomElement, Aurelia, Router, IContainer } from "aurelia";
+import { CustomElement, Aurelia } from "aurelia";
 import { isFirefox } from "../shared/env"
 import { IComponentController } from '@aurelia/runtime-html';
 import { IControllerInfo } from "../shared/controller-info";

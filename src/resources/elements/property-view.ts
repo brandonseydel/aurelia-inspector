@@ -1,5 +1,5 @@
 import { ICustomElementViewModel } from 'aurelia';
-import { inject, bindable, IPlatform } from 'aurelia';
+import { resolve, bindable, IPlatform } from 'aurelia';
 
 import { DebugHost } from '../../backend/debug-host';
 import { IControllerInfo } from '../../shared/controller-info';
@@ -7,13 +7,14 @@ import { types } from 'util';
 
 const editableTypes = ['string', 'number', 'boolean', 'bigint'];
 
-@inject()
 export class PropertyView implements ICustomElementViewModel {
   @bindable property: IControllerInfo['bindables'][0];
   @bindable controller: IControllerInfo;
   editor: HTMLInputElement;
 
-  constructor(public debugHost: DebugHost, @IPlatform private platform: IPlatform) { }
+  private platform: IPlatform = resolve(IPlatform);
+
+  constructor(public debugHost: DebugHost) { }
 
   beginEditing() {
     if (editableTypes.some(x => x === this.property?.type || this.property.value == null)) {
