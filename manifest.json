@@ -12,6 +12,7 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "build/contentscript.js",
         "devtools.html",
         "devtools-background.html"
       ],
@@ -24,9 +25,16 @@
     {
       "all_frames": true,
       "matches": ["<all_urls>"],
-      "js": ["build/contentscript.js"],
+      "js": ["build/contentscript.js", "build/test-script.js"],
       "run_at": "document_start"
     }   ,
+    {
+      "all_frames": true,
+      "matches": ["<all_urls>"],
+      "js": ["build/test-script.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
     {
       "all_frames": true,
       "matches": ["<all_urls>"],
@@ -50,5 +58,6 @@
     "extension_pages": "script-src 'self'; object-src 'self';",
     "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
   },
+  "permissions": ["scripting", "activeTab"],
   "host_permissions": ["file:///*", "http://*/*", "https://*/*"]
 }
