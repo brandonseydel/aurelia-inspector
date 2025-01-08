@@ -1,8 +1,23 @@
-import { Aurelia } from "aurelia";
+import { CustomElement, Aurelia } from "aurelia";
+import { isFirefox } from "../shared/env"
 import { IComponentController } from '@aurelia/runtime-html';
 import { IControllerInfo } from "../shared/controller-info";
 import { AureliaHooks } from "../shared/aurelia-hooks";
+import { type } from "os";
 
+export function installScript(fn) {
+  const source = ';(' + fn.toString() + ')(window, )'
+
+  if (isFirefox) {
+    // eslint-disable-next-line no-eval
+    window.eval(source) // in Firefox, this evaluates on the content window
+  } else {
+    const script = document.createElement('script')
+    script.textContent = source
+    document.documentElement.appendChild(script)
+    script.parentNode.removeChild(script)
+  }
+}
 
 export function getAureliaInstance(win): Aurelia | undefined {
   const all = document.querySelectorAll('*')
@@ -14,8 +29,11 @@ export function getAureliaInstance(win): Aurelia | undefined {
   }
 }
 
+export function getCustomElementInfo(element: Element) {
+  return CustomElement.for(element);
+}
 
-export function install(win = window): AureliaHooks {
+export function install(win) {
   let nextDebugId = 0;
   let debugValueLookup = {}
 
@@ -55,25 +73,19 @@ export function install(win = window): AureliaHooks {
 
       try {
         while (!customElement && element !== document.body) {
-          ///*prettier-ignore*/ console.log("----------------------------");
-          ///*prettier-ignore*/ console.log("[contentscript.ts,82] element.tagName: ", element.tagName);
           const au = element['$au'];
-          // /*prettier-ignore*/ console.log("[contentscript.ts,74] au: ", au);
           if (au) {
             customElement = element['$au']['au:resource:custom-element'];
             const customAttributeKeys = Object.getOwnPropertyNames(au).filter(y => y.includes('custom-attribute'));
             customAttributes = customAttributeKeys.map(x => au[x] as IComponentController);
           }
           element = element.parentElement;
-          // /*prettier-ignore*/ console.log("[contentscript.ts,82] element.tagName: ", element.tagName);
           if (!traverse) break;
         }
       } catch (e) {
         console.log(e)
       }
 
-      ///*prettier-ignore*/ console.log("[contentscript.ts,87] customElement: ", customElement);
-      ///*prettier-ignore*/ console.log("[contentscript.ts,87] customAttributes: ", customAttributes);
       if (!customElement && !customAttributes) return;
 
       hooks.currentElement = customElement;
@@ -128,7 +140,15 @@ export function install(win = window): AureliaHooks {
     }
   }
 
-  return hooks;
+  window.addEventListener('au-started', (customEvent: CustomEvent<Aurelia>) => {
+    hooks.Aurelia = customEvent.detail;
+  }, { once: true });
+
+  Object.defineProperty(win, '__AURELIA_DEVTOOLS_GLOBAL_HOOK__', {
+    get() {
+      return hooks;
+    }
+  });
 
   function extractControllerInfo(customElement) {
     if (!customElement) return;
@@ -476,6 +496,7 @@ export function install(win = window): AureliaHooks {
 }
 
 
+
 Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
   get() {
     return {
@@ -487,32 +508,5 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
 
 // inject the hook
 if (document instanceof HTMLDocument) {
-  window.addEventListener('DOMContentLoaded', async () => {
-    /*prettier-ignore*/ console.log("[contentscript.ts,517] DOMContentLoaded: ", );
-    const hooks = install()
-    const port = chrome.runtime.connect({ name: "content-connection" });
-
-    // Listen for messages from the background script
-    port.onMessage.addListener((message) => {
-      /*prettier-ignore*/ console.log("----------------------------");
-      /*prettier-ignore*/ console.log("[contentscript.ts,499] message: ", message);
-      /*prettier-ignore*/ console.log("[contentscript.ts,519] hooks: ", hooks);
-      if (!message) return;
-      switch (message.type) {
-        case "dt_getCustomElementInfo_cs": {
-          port.postMessage({ type: "cs_getCustomElementInfo_dh", payload: message.payload });
-          break;
-        }
-        case "dt_getAllInfo_cs": {
-          port.postMessage({ type: "cs_getAllInfo_dh", payload: message.payload });
-          break;
-        }
-        default: { }
-      }
-      // port.postMessage({ type: "getCustomElementInfo", payload });
-    });
-    /*prettier-ignore*/ console.log("[contentscript.ts,564] window: ", window);
-  })
+  installScript(install)
 }
-
-

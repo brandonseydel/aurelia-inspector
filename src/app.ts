@@ -11,8 +11,7 @@ export class App implements ICustomElementViewModel {
 
   selectedElement: IControllerInfo = undefined;
   selectedElementAttributes: IControllerInfo[] = undefined;
-  // @ts-ignore
-  allAureliaObjects: AureliaInfo[] = ["what"];
+  allAureliaObjects: AureliaInfo[] = undefined;
 
   private debugHost: DebugHost = resolve(DebugHost);
   private plat: IPlatform = resolve(IPlatform);
