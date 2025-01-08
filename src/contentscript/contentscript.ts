@@ -1,23 +1,8 @@
-import { CustomElement, Aurelia } from "aurelia";
-import { isFirefox } from "../shared/env"
+import { Aurelia } from "aurelia";
 import { IComponentController } from '@aurelia/runtime-html';
 import { IControllerInfo } from "../shared/controller-info";
 import { AureliaHooks } from "../shared/aurelia-hooks";
-import { type } from "os";
 
-export function installScript(fn) {
-  const source = ';(' + fn.toString() + ')(window, )'
-
-  if (isFirefox) {
-    // eslint-disable-next-line no-eval
-    window.eval(source) // in Firefox, this evaluates on the content window
-  } else {
-    const script = document.createElement('script')
-    script.textContent = source
-    document.documentElement.appendChild(script)
-    script.parentNode.removeChild(script)
-  }
-}
 
 export function getAureliaInstance(win): Aurelia | undefined {
   const all = document.querySelectorAll('*')
@@ -29,11 +14,8 @@ export function getAureliaInstance(win): Aurelia | undefined {
   }
 }
 
-export function getCustomElementInfo(element: Element) {
-  return CustomElement.for(element);
-}
 
-export function install(win) {
+export function install(win = window): AureliaHooks {
   let nextDebugId = 0;
   let debugValueLookup = {}
 
@@ -140,15 +122,7 @@ export function install(win) {
     }
   }
 
-  window.addEventListener('au-started', (customEvent: CustomEvent<Aurelia>) => {
-    hooks.Aurelia = customEvent.detail;
-  }, { once: true });
-
-  Object.defineProperty(win, '__AURELIA_DEVTOOLS_GLOBAL_HOOK__', {
-    get() {
-      return hooks;
-    }
-  });
+  return hooks;
 
   function extractControllerInfo(customElement) {
     if (!customElement) return;
@@ -496,7 +470,6 @@ export function install(win) {
 }
 
 
-
 Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
   get() {
     return {
@@ -508,5 +481,23 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
 
 // inject the hook
 if (document instanceof HTMLDocument) {
-  installScript(install)
+  window.addEventListener('DOMContentLoaded', async () => {
+    const port = chrome.runtime.connect({ name: "content-connection" });
+    port.onMessage.addListener((message) => {
+      if (!message) return;
+      switch (message.type) {
+        case "dt_getCustomElementInfo_cs": {
+          port.postMessage({ type: "cs_getCustomElementInfo_dh", payload: message.payload });
+          break;
+        }
+        case "dt_getAllInfo_cs": {
+          port.postMessage({ type: "cs_getAllInfo_dh", payload: message.payload });
+          break;
+        }
+        default: { }
+      }
+    });
+  })
 }
+
+
