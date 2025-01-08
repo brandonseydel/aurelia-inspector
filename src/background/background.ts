@@ -3,9 +3,9 @@ chrome.runtime.onMessage.addListener((req, sender) => {
     chrome.action.setIcon({
       tabId: sender.tab.id,
       path: {
-        16: `images/16.png`,
-        48: `images/48.png`,
-        128: `images/128.png`
+        16: `../images/16.png`,
+        48: `../images/48.png`,
+        128: `../images/128.png`
       }
     });
 
