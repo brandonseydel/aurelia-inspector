@@ -479,13 +479,18 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
   }
 });
 
+const port = chrome.runtime.connect({ name: "content-connection" });
 // inject the hook
 if (document instanceof HTMLDocument) {
   window.addEventListener('DOMContentLoaded', async () => {
-    const port = chrome.runtime.connect({ name: "content-connection" });
     port.onMessage.addListener((message) => {
       if (!message) return;
       switch (message.type) {
+        case "dh_getExpandedDebugValueForId_cs": {
+          /*prettier-ignore*/ console.log("[CS] 2. [contentscript.ts,490] dh_getExpandedDebugValueForId_cs: ", );
+          port.postMessage({ type: "cs_getExpandedDebugValueForId_dt", ...message });
+          break;
+        }
         case "dt_getCustomElementInfo_cs": {
           port.postMessage({ type: "cs_getCustomElementInfo_dh", payload: message.payload });
           break;
