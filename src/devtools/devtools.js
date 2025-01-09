@@ -95,9 +95,7 @@ function install(debugValueLookup) {
     },
 
     getExpandedDebugValueForId(id) {
-      /*prettier-ignore*/ console.log("----------------------------");
       let value = debugValueLookup[id].expandableValue;
-      /*prettier-ignore*/ console.log("[devtools.js,93] value: ", value);
 
       if (Array.isArray(value)) {
         let newValue = {};
