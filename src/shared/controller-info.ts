@@ -9,7 +9,7 @@ export interface Property {
   isExpanded?: boolean,
   name: string,
   value: unknown,
-  expandedValue?: unknown,
+  expandedValue?: IControllerInfo,
 }
 
 export interface IControllerInfo {

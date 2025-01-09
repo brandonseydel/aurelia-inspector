@@ -581,7 +581,7 @@ function initPort() {
           /*prettier-ignore*/ console.log("[devtools.js,556] result: ", result);
           if (!_port) return;
           _port.postMessage({
-            type: "dt_getExpandedDebugValueForId_dh",
+            type: "dt_getExpandedDebugValueForId_cs",
             payload: result,
           });
         });
