@@ -500,7 +500,6 @@ if (document instanceof HTMLDocument) {
          *   So I suggest to leave it as it is, until there is a more robust solution.
          */
         case "dh_getExpandedDebugValueForId_cs": {
-          /*prettier-ignore*/ console.log("[CS] 2. [contentscript.ts,490] dh_getExpandedDebugValueForId_cs: ", );
           port.postMessage({ type: "cs_getExpandedDebugValueForId_dt", ...message });
           break;
         }

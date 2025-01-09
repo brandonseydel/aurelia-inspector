@@ -30,7 +30,6 @@ export class DebugHost implements ICustomElementViewModel {
         port.onMessage.addListener((message: IMessages) => {
           switch (message.type) {
             case "cs_getExpandedDebugValueForId_dh": {
-              /*prettier-ignore*/ console.log("Y. [debug-host.ts,39] message: ", message);
               // @ts-ignore
               this.currentDebugInfo.expandedValue = {
                 properties: message.payload.properties,
@@ -39,7 +38,6 @@ export class DebugHost implements ICustomElementViewModel {
               break;
             }
             case "cs_getCustomElementInfo_dh": {
-              /*prettier-ignore*/ console.log("[debug-host.ts,38] cs_getCustomElementInfo_dh: ", );
               const payload = message.payload;
               this.consumer.selectedElement = payload?.customElementInfo;
               this.consumer.selectedElementAttributes =

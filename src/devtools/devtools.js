@@ -1,5 +1,4 @@
 chrome.runtime.onMessage.addListener((req, sender) => {
-  /*prettier-ignore*/ console.log("[devtools.js,2] req: ", req);
   if (sender.tab && req.aureliaDetected) {
     chrome.devtools.panels.elements.createSidebarPane(
       "Aurelia",
@@ -58,11 +57,8 @@ function install(debugValueLookup) {
 
       try {
         while (!customElement && element !== document.body) {
-          ///*prettier-ignore*/ console.log("----------------------------");
-          ///*prettier-ignore*/ console.log("[contentscript.ts,82] element.tagName: ", element.tagName);
           if (!element) return;
           const au = element["$au"];
-          // /*prettier-ignore*/ console.log("[contentscript.ts,74] au: ", au);
           if (au) {
             customElement = element["$au"]["au:resource:custom-element"];
             const customAttributeKeys = Object.getOwnPropertyNames(au).filter(
@@ -71,23 +67,18 @@ function install(debugValueLookup) {
             customAttributes = customAttributeKeys.map((x) => au[x]);
           }
           element = element.parentElement;
-          // /*prettier-ignore*/ console.log("[contentscript.ts,82] element.tagName: ", element.tagName);
           if (!traverse) break;
         }
       } catch (e) {
         console.log(e);
       }
 
-      ///*prettier-ignore*/ console.log("[contentscript.ts,87] customElement: ", customElement);
-      ///*prettier-ignore*/ console.log("[contentscript.ts,87] customAttributes: ", customAttributes);
       if (!customElement && !customAttributes) return;
 
       hooks.currentElement = customElement;
       hooks.currentAttributes = customAttributes;
 
       const customElementInfo = extractControllerInfo(customElement);
-      /*prettier-ignore*/ console.log("[devtools.js,88] customElementInfo: ", customElementInfo);
-      /*prettier-ignore*/ console.log("[devtools.js,92] debugValueLookup: ", debugValueLookup);
       const customAttributesInfo =
         customAttributes &&
         customAttributes.map(extractControllerInfo).filter((x) => x);
@@ -99,8 +90,6 @@ function install(debugValueLookup) {
 
     getExpandedDebugValueForId(id) {
       let value = debugValueLookup[id].expandableValue;
-      /*prettier-ignore*/ console.log("B. ----------------------------");
-      /*prettier-ignore*/ console.log("[devtools.js,99] value: ", value);
 
       if (Array.isArray(value)) {
         let newValue = {};
@@ -143,7 +132,6 @@ function install(debugValueLookup) {
   return {hooks, debugValueLookup};
 
   function extractControllerInfo(customElement) {
-    /*prettier-ignore*/ console.log("[devtools.js,144] extractControllerInfo: ", );
     if (!customElement) return;
     const bindableKeys = Object.keys(customElement.definition.bindables);
     const returnVal = {
@@ -547,19 +535,15 @@ function install(debugValueLookup) {
   }
 }
 
+/** 
+ * Manifest v3 approach to evaluate code in the context of the inspected window.
+ */
 const hooksAsString = `
 var globalDebugValueLookup;
 var installedData = (${install.toString()})(globalDebugValueLookup)
 var {hooks} = installedData;
 globalDebugValueLookup = installedData.debugValueLookup;
 `;
-//try {
-//  if (debugValueLookup && Object.keys(debugValueLookup).length > 0) {
-//    debugValueLookup = {...debugValueLookup ,...installedData.debugValueLookup};
-//  }
-//} else {
-//  var debugValueLookup = installedData.debugValueLookup;
-//}
 
 function initPort() {
   let _port;
@@ -568,17 +552,14 @@ function initPort() {
     _port = port;
 
     _port.onMessage.addListener((message) => {
-      /*prettier-ignore*/ console.log("[DT] 3 [devtools.js,553] message: ", message);
       if (
         message.type === "cs_getExpandedDebugValueForId_dt" ||
         message.type === "dh_getExpandedDebugValueForId_cs" ||
         message.type === "dh_getExpandedDebugValueForId_dt"
       ) {
         const id = message.debugId;
-        /*prettier-ignore*/ console.log("[devtools.js,562] id: ", id);
         const expression = ` try { ${hooksAsString}; hooks.getExpandedDebugValueForId(${id}); } catch (e) { console.error('from devtools.js', e); }`;
         chrome.devtools.inspectedWindow.eval(expression, (result) => {
-          /*prettier-ignore*/ console.log("[devtools.js,556] result: ", result);
           if (!_port) return;
           _port.postMessage({
             type: "dt_getExpandedDebugValueForId_cs",
