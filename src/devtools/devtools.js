@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener((req, sender) => {
       "Aurelia",
       function (sidebar) {
         sidebar.setPage(`index-v${req.version}.html`);
-      },
+      }
     );
   }
 });
@@ -560,9 +560,7 @@ const hooksAsStringv2 = `
   globalDebugValueLookup = installedData.debugValueLookup;
   `;
 
-function initPort() {
-  chrome.runtime.onConnect.addListener((port) => {
-    chrome.devtools.inspectedWindow.eval(hooksAsStringv2);
-  });
-}
-initPort();
+chrome.runtime.onConnect.addListener((port) => {
+  chrome.devtools.inspectedWindow.eval(hooksAsStringv2);
+});
+
