@@ -13,8 +13,7 @@ export class PropertyView implements ICustomElementViewModel {
   editor: HTMLInputElement;
 
   private platform: IPlatform = resolve(IPlatform);
-
-  constructor(public debugHost: DebugHost) { }
+  private debugHost: DebugHost = resolve(DebugHost);
 
   beginEditing() {
     if (editableTypes.some(x => x === this.property?.type || this.property.value == null)) {
