@@ -2,12 +2,14 @@ import { CustomElementDefinition, CustomAttributeDefinition } from '@aurelia/run
 
 export interface Property {
   type: string,
+  debugId?: number,
   canExpand?: boolean,
   canEdit?: boolean,
   isEditing?: boolean,
-  isExpanding?: boolean,
+  isExpanded?: boolean,
   name: string,
-  value: unknown
+  value: unknown,
+  expandedValue?: IControllerInfo,
 }
 
 export interface IControllerInfo {
