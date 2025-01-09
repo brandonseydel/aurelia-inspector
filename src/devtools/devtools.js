@@ -10,6 +10,12 @@ chrome.runtime.onMessage.addListener((req, sender) => {
 });
 
 function install(debugValueLookup) {
+  const denyListProps = [
+    "$controller",
+    "$observers",
+    "$element",
+    "$bindingContext",
+  ];
   let nextDebugId = 0;
   if (!debugValueLookup) {
     debugValueLookup = {};
@@ -49,7 +55,7 @@ function install(debugValueLookup) {
 
         currentInfo.viewModel[x.name] = x.value;
       });
-      return undefined;
+      return property;
     },
     getCustomElementInfo: (element, traverse = true) => {
       let customElement;
@@ -89,7 +95,9 @@ function install(debugValueLookup) {
     },
 
     getExpandedDebugValueForId(id) {
+      /*prettier-ignore*/ console.log("----------------------------");
       let value = debugValueLookup[id].expandableValue;
+      /*prettier-ignore*/ console.log("[devtools.js,93] value: ", value);
 
       if (Array.isArray(value)) {
         let newValue = {};
@@ -107,7 +115,8 @@ function install(debugValueLookup) {
         value = Array.from(value);
       }
 
-      return convertObjectToDebugInfo(value);
+      const converted = convertObjectToDebugInfo(value);
+      return converted;
 
       // https://stackoverflow.com/questions/29924932/how-to-reliably-check-an-object-is-an-ecmascript-6-map-set
       function isMap(o) {
@@ -129,7 +138,7 @@ function install(debugValueLookup) {
     },
   };
 
-  return {hooks, debugValueLookup};
+  return { hooks, debugValueLookup };
 
   function extractControllerInfo(customElement) {
     if (!customElement) return;
@@ -526,7 +535,13 @@ function install(debugValueLookup) {
     const uniqueKeys = keys.filter((value, i, arr) => arr.indexOf(value) === i);
 
     for (const key of uniqueKeys) {
-      if (key && !key.startsWith("_") && typeof obj[key] !== "function") {
+      const isDenyListed = denyListProps.some((x) => x === key);
+      if (
+        key &&
+        !key.startsWith("_") &&
+        !isDenyListed &&
+        typeof obj[key] !== "function"
+      ) {
         props.push(key);
       }
     }
@@ -534,59 +549,20 @@ function install(debugValueLookup) {
     return props;
   }
 }
-
-/** 
+/**
  * Manifest v3 approach to evaluate code in the context of the inspected window.
  */
-const hooksAsString = `
-var globalDebugValueLookup;
-var installedData = (${install.toString()})(globalDebugValueLookup)
-var {hooks} = installedData;
-globalDebugValueLookup = installedData.debugValueLookup;
-`;
+const hooksAsStringv2 = `
+  var globalDebugValueLookup;
+  var installedData = (${install.toString()})(globalDebugValueLookup)
+  var {hooks} = installedData;
+  window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__ = hooks;
+  globalDebugValueLookup = installedData.debugValueLookup;
+  `;
 
 function initPort() {
-  let _port;
-
   chrome.runtime.onConnect.addListener((port) => {
-    _port = port;
-
-    _port.onMessage.addListener((message) => {
-      if (
-        message.type === "cs_getExpandedDebugValueForId_dt" ||
-        message.type === "dh_getExpandedDebugValueForId_cs" ||
-        message.type === "dh_getExpandedDebugValueForId_dt"
-      ) {
-        const id = message.debugId;
-        const expression = ` try { ${hooksAsString}; hooks.getExpandedDebugValueForId(${id}); } catch (e) { console.error('from devtools.js', e); }`;
-        chrome.devtools.inspectedWindow.eval(expression, (result) => {
-          if (!_port) return;
-          _port.postMessage({
-            type: "dt_getExpandedDebugValueForId_cs",
-            payload: result,
-          });
-        });
-      }
-    });
-  });
-
-  chrome.devtools.network.onNavigated.addListener(() => {
-    const expression = `${hooksAsString}; hooks.getAllInfo($0);`;
-    chrome.devtools.inspectedWindow.eval(expression, (result) => {
-      if (!_port) return;
-      _port.postMessage({ type: "dt_getAllInfo_cs", payload: result });
-    });
-  });
-
-  chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-    const expression = `${hooksAsString}; hooks.getCustomElementInfo($0);`;
-    chrome.devtools.inspectedWindow.eval(expression, (result) => {
-      if (!_port) return;
-      _port.postMessage({
-        type: "dt_getCustomElementInfo_cs",
-        payload: result,
-      });
-    });
+    chrome.devtools.inspectedWindow.eval(hooksAsStringv2);
   });
 }
 initPort();

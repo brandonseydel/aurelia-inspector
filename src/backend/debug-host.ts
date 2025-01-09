@@ -16,48 +16,27 @@ export class DebugHost implements ICustomElementViewModel {
   private currentDebugInfo: Property;
 
   attach(consumer: App) {
+
     this.consumer = consumer;
     if (chrome && chrome.devtools) {
-      this.initPort();
+      chrome.devtools.network.onNavigated.addListener(() => {
+        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getAllInfo()`, (debugObject: AureliaInfo[]) => {
+          this.consumer.allAureliaObjects = debugObject
+        });
+      });
+
+      chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
+        chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getCustomElementInfo($0)`, (debugObject: AureliaInfo) => {
+          this.consumer.selectedElement = debugObject?.customElementInfo;
+          this.consumer.selectedElementAttributes = debugObject?.customAttributesInfo;
+        });
+      });
+
+      chrome.devtools.inspectedWindow.eval(`window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getAllInfo()`, (debugObject: AureliaInfo[]) => {
+        this.consumer.allAureliaObjects = debugObject;
+      });
     }
   }
-
-  private initPort = () => {
-    chrome.runtime.onConnect.addListener((port) => {
-      this.port = port;
-
-      if (port.name === "content-connection") {
-        port.onMessage.addListener((message: IMessages) => {
-          switch (message.type) {
-            case "cs_getExpandedDebugValueForId_dh": {
-              // @ts-ignore
-              this.currentDebugInfo.expandedValue = {
-                properties: message.payload.properties,
-              };
-              this.currentDebugInfo.isExpanded = true;
-              break;
-            }
-            case "cs_getCustomElementInfo_dh": {
-              const payload = message.payload;
-              this.consumer.selectedElement = payload?.customElementInfo;
-              this.consumer.selectedElementAttributes =
-                payload?.customAttributesInfo;
-              break;
-            }
-            case "cs_getAllInfo_dh": {
-              this.consumer.allAureliaObjects = (
-                message as unknown as IMessages<AureliaInfo[]>
-              ).payload;
-              break;
-            }
-            default: {
-              return;
-            }
-          }
-        });
-      }
-    });
-  };
 
   updateValues(
     value: IControllerInfo,
@@ -66,6 +45,7 @@ export class DebugHost implements ICustomElementViewModel {
     chrome.devtools.inspectedWindow.eval(
       `window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.updateValues(${JSON.stringify(value)}, ${JSON.stringify(property)})`,
       (debugObject: AureliaInfo) => {
+        /*prettier-ignore*/ console.log("[debug-host.ts,69] debugObject: ", debugObject);
         // this.consumer.selectedElement = debugObject;
       },
     );
@@ -88,9 +68,10 @@ export class DebugHost implements ICustomElementViewModel {
       debugInfo.isExpanded = !debugInfo.isExpanded;
 
       if (debugInfo.isExpanded && !debugInfo.expandedValue) {
-        this.port.postMessage({
-          type: "dh_getExpandedDebugValueForId_cs",
-          debugId: debugInfo.debugId,
+        let code = `window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getExpandedDebugValueForId(${debugInfo.debugId});`;
+        chrome.devtools.inspectedWindow.eval(code, (message: IControllerInfo) => {
+          this.currentDebugInfo.expandedValue = message;
+          this.currentDebugInfo.isExpanded = true;
         });
       }
     }

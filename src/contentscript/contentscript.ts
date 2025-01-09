@@ -480,44 +480,10 @@ Object.defineProperty(window, '__AURELIA_DEVTOOLS_HOOK__', {
   }
 });
 
+
 const port = chrome.runtime.connect({ name: "content-connection" });
-// inject the hook
 if (document instanceof HTMLDocument) {
   window.addEventListener('DOMContentLoaded', async () => {
-    port.onMessage.addListener((message) => {
-      if (!message) return;
-      switch (message.type) {
-        /** 
-         * Workaround: There is a strange behavior, where sending a message
-         * from debug-host.ts to devtools.js does not work. This is a workaround
-         * has to go through the contentscript.ts first.
-         * 1. debug-host.ts -> contentscript.ts via `dh_getExpandedDebugValueForId_cs`
-         * 2. debug-host.ts -> devtools.js also(!) via `dh_getExpandedDebugValueForId_cs`
-         *    - this is the strange behavior: this message is not received by devtools.js, when we leave
-         *      following case. THEN we NEED to also send a port.postMessage, which is never received in devtools.js
-         *      BUT, it makes devtools.js receive (1.) as well.
-         * All in all, if you remove the following `case` statement, the message there is no communication happening.
-         *   So I suggest to leave it as it is, until there is a more robust solution.
-         */
-        case "dh_getExpandedDebugValueForId_cs": {
-          port.postMessage({ type: "cs_getExpandedDebugValueForId_dt", ...message });
-          break;
-        }
-        case "dt_getCustomElementInfo_cs": {
-          port.postMessage({ type: "cs_getCustomElementInfo_dh", payload: message.payload });
-          break;
-        }
-        case "dt_getExpandedDebugValueForId_cs": {
-          port.postMessage({ type: "cs_getExpandedDebugValueForId_dh", payload: message.payload });
-          break;
-        }
-        case "dt_getAllInfo_cs": {
-          port.postMessage({ type: "cs_getAllInfo_dh", payload: message.payload });
-          break;
-        }
-        default: { }
-      }
-    });
   })
 }
 
