@@ -55,6 +55,7 @@ export function install(win = window): AureliaHooks {
 
       try {
         while (!customElement && element !== document.body) {
+          if (!element) return
           const au = element['$au'];
           if (au) {
             customElement = element['$au']['au:resource:custom-element'];

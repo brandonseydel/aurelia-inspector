@@ -10,9 +10,11 @@ chrome.runtime.onMessage.addListener((req, sender) => {
   }
 });
 
-function install(win = window) {
+function install(debugValueLookup) {
   let nextDebugId = 0;
-  let debugValueLookup = {};
+  if (!debugValueLookup) {
+    debugValueLookup = {};
+  }
 
   const hooks = {
     Aurelia: undefined,
@@ -58,6 +60,7 @@ function install(win = window) {
         while (!customElement && element !== document.body) {
           ///*prettier-ignore*/ console.log("----------------------------");
           ///*prettier-ignore*/ console.log("[contentscript.ts,82] element.tagName: ", element.tagName);
+          if (!element) return;
           const au = element["$au"];
           // /*prettier-ignore*/ console.log("[contentscript.ts,74] au: ", au);
           if (au) {
@@ -83,6 +86,8 @@ function install(win = window) {
       hooks.currentAttributes = customAttributes;
 
       const customElementInfo = extractControllerInfo(customElement);
+      /*prettier-ignore*/ console.log("[devtools.js,88] customElementInfo: ", customElementInfo);
+      /*prettier-ignore*/ console.log("[devtools.js,92] debugValueLookup: ", debugValueLookup);
       const customAttributesInfo =
         customAttributes &&
         customAttributes.map(extractControllerInfo).filter((x) => x);
@@ -94,6 +99,8 @@ function install(win = window) {
 
     getExpandedDebugValueForId(id) {
       let value = debugValueLookup[id].expandableValue;
+      /*prettier-ignore*/ console.log("B. ----------------------------");
+      /*prettier-ignore*/ console.log("[devtools.js,99] value: ", value);
 
       if (Array.isArray(value)) {
         let newValue = {};
@@ -133,9 +140,10 @@ function install(win = window) {
     },
   };
 
-  return hooks;
+  return {hooks, debugValueLookup};
 
   function extractControllerInfo(customElement) {
+    /*prettier-ignore*/ console.log("[devtools.js,144] extractControllerInfo: ", );
     if (!customElement) return;
     const bindableKeys = Object.keys(customElement.definition.bindables);
     const returnVal = {
@@ -539,18 +547,52 @@ function install(win = window) {
   }
 }
 
-const hooksAsString = `var hooks = (${install.toString()})()`;
+const hooksAsString = `
+var globalDebugValueLookup;
+var installedData = (${install.toString()})(globalDebugValueLookup)
+var {hooks} = installedData;
+globalDebugValueLookup = installedData.debugValueLookup;
+`;
+//try {
+//  if (debugValueLookup && Object.keys(debugValueLookup).length > 0) {
+//    debugValueLookup = {...debugValueLookup ,...installedData.debugValueLookup};
+//  }
+//} else {
+//  var debugValueLookup = installedData.debugValueLookup;
+//}
 
 function initPort() {
   let _port;
 
   chrome.runtime.onConnect.addListener((port) => {
     _port = port;
+
+    _port.onMessage.addListener((message) => {
+      /*prettier-ignore*/ console.log("[DT] 3 [devtools.js,553] message: ", message);
+      if (
+        message.type === "cs_getExpandedDebugValueForId_dt" ||
+        message.type === "dh_getExpandedDebugValueForId_cs" ||
+        message.type === "dh_getExpandedDebugValueForId_dt"
+      ) {
+        const id = message.debugId;
+        /*prettier-ignore*/ console.log("[devtools.js,562] id: ", id);
+        const expression = ` try { ${hooksAsString}; hooks.getExpandedDebugValueForId(${id}); } catch (e) { console.error('from devtools.js', e); }`;
+        chrome.devtools.inspectedWindow.eval(expression, (result) => {
+          /*prettier-ignore*/ console.log("[devtools.js,556] result: ", result);
+          if (!_port) return;
+          _port.postMessage({
+            type: "dt_getExpandedDebugValueForId_dh",
+            payload: result,
+          });
+        });
+      }
+    });
   });
 
   chrome.devtools.network.onNavigated.addListener(() => {
     const expression = `${hooksAsString}; hooks.getAllInfo($0);`;
     chrome.devtools.inspectedWindow.eval(expression, (result) => {
+      if (!_port) return;
       _port.postMessage({ type: "dt_getAllInfo_cs", payload: result });
     });
   });
@@ -558,7 +600,11 @@ function initPort() {
   chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
     const expression = `${hooksAsString}; hooks.getCustomElementInfo($0);`;
     chrome.devtools.inspectedWindow.eval(expression, (result) => {
-      _port.postMessage({ type: "dt_getCustomElementInfo_cs", payload: result });
+      if (!_port) return;
+      _port.postMessage({
+        type: "dt_getCustomElementInfo_cs",
+        payload: result,
+      });
     });
   });
 }
