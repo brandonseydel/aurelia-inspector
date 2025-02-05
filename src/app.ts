@@ -1,9 +1,9 @@
 import { DebugHost, SelectionChanged } from "./backend/debug-host";
-import { inject, ValueConverterInstance, INode, ICustomElementViewModel, IPlatform, bindable } from "aurelia";
+import { ValueConverterInstance, INode, ICustomElementViewModel, IPlatform, bindable } from "aurelia";
 import { IControllerInfo } from "./shared/controller-info";
 import { AureliaInfo } from "./shared/aurelia-hooks";
+import { resolve } from "@aurelia/kernel";
 
-@inject()
 export class App implements ICustomElementViewModel {
   debugInfo: any;
   isDarkTheme: boolean = false;
@@ -13,7 +13,10 @@ export class App implements ICustomElementViewModel {
   selectedElementAttributes: IControllerInfo[] = undefined;
   allAureliaObjects: AureliaInfo[] = undefined;
 
-  constructor(private readonly debugHost: DebugHost, @IPlatform private readonly plat: IPlatform) {
+  private debugHost: DebugHost = resolve(DebugHost);
+  private plat: IPlatform = resolve(IPlatform);
+
+  constructor() {
   }
 
   attaching() {

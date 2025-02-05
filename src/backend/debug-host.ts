@@ -5,7 +5,7 @@ import {
   CustomElement,
   ICustomElementViewModel
 } from "aurelia";
-import { IControllerInfo } from '../shared/controller-info';
+import { IControllerInfo, Property } from '../shared/controller-info';
 
 declare let aureliaDebugger;
 
@@ -13,8 +13,6 @@ export class SelectionChanged {
   constructor(public debugInfo: IControllerInfo) { }
 }
 
-
-@inject()
 export class DebugHost implements ICustomElementViewModel {
   consumer: App;
 
@@ -49,7 +47,7 @@ export class DebugHost implements ICustomElementViewModel {
     });
   }
 
-  updateDebugValue(debugInfo) {
+  updateDebugValue(debugInfo: Property) {
     let value = debugInfo.value;
 
     if (debugInfo.type === "string") {
@@ -60,14 +58,13 @@ export class DebugHost implements ICustomElementViewModel {
     chrome.devtools.inspectedWindow.eval(code);
   }
 
-  toggleDebugValueExpansion(debugInfo) {
+  toggleDebugValueExpansion(debugInfo: Property) {
     if (debugInfo.canExpand) {
       debugInfo.isExpanded = !debugInfo.isExpanded;
 
       if (debugInfo.isExpanded && !debugInfo.expandedValue) {
         let code = `window.__AURELIA_DEVTOOLS_GLOBAL_HOOK__.getExpandedDebugValueForId(${debugInfo.debugId});`;
-
-        chrome.devtools.inspectedWindow.eval(code, (expandedValue) => {
+        chrome.devtools.inspectedWindow.eval(code, (expandedValue: IControllerInfo) => {
           debugInfo.expandedValue = expandedValue;
           debugInfo.isExpanded = true;
         });
